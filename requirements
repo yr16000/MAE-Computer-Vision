@@ -1,6 +1,7 @@
 torch
 torchvision
 transformers
+accelerate
 datasets
 huggingface_hub
 tqdm
@@ -9,3 +10,4 @@ scikit-learn
 matplotlib
 numpy
 seaborn
+Pillow
