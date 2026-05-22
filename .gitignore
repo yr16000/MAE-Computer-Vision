@@ -1,0 +1,21 @@
+# Modèles (téléchargés automatiquement depuis HuggingFace)
+vit-mae-large/
+clip-vit-large-patch14/
+
+# Dataset
+imagenet100-hf/
+imagenette/
+
+# Paires pré-générées (trop lourdes pour GitHub)
+pairs_*.pt
+
+# Artefacts générés
+*.npy
+
+# Python
+__pycache__/
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+**/.DS_Store
