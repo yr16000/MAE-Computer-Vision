@@ -7,6 +7,7 @@
 ## Setup
 
 ```bash
+git lfs install   # only needed once, if not already installed
 git clone https://github.com/yr16000/MAE-Computer-Vision.git
 cd MAE-Computer-Vision
 pip install -r requirements
@@ -47,4 +48,4 @@ Requires: `projection_cls_aug_mlp_best.pt`, `projection_cls_aug_mlpv2_best.pt`, 
 | `wp4v5_generation_training.ipynb` | Generates 6.5M training pairs (100 masked MAE CLS per image, averaged into 50 groups) then trains the projection MLP targeting LLaVA's CLIP 336px vision tower |
 | `wp4v5_4_test.ipynb` | Injects projected MAE embeddings into LLaVA-1.5 and generates image descriptions |
 
-Run `wp4v5_generation_training.ipynb` first. `wp4v5_4_test.ipynb` requires `wp4v5_ftheta_best_24.pt` and `wp4v5_norm_stats.pt` (included in this repo).
+Run `wp4v5_generation_training.ipynb` first. `wp4v5_4_test.ipynb` requires `wp4v5_ftheta_best_24.pt` and `wp4v5_norm_stats.pt` (included via Git LFS).
