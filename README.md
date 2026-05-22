@@ -1,140 +1,50 @@
-# WP3 — MAE → CLIP Alignment via Projection MLP
+# MAE Computer Vision — SPEIT 2026
 
-Aligning visual representations from **MAE ViT-L/16** to the **CLIP ViT-L/14** space via a trained projection MLP on ImageNet-100 (117,000 images, 100 classes).
+*Yann BUTEL, Ahmed EL KHOULY, Philippe LIN, Yanis RABIA*
 
-## Base Models
+---
 
-| Model | HuggingFace ID | Dimension |
-|-------|---------------|-----------|
-| MAE ViT-L/16 (Facebook) | `facebook/vit-mae-large` | 1024 |
-| CLIP ViT-L/14 (OpenAI) | `openai/clip-vit-large-patch14` | 768 |
-
-Downloaded automatically from HuggingFace on first run.
-
-## Requirements
-
-- Python 3.10+
-- GPU 16 GB+ VRAM recommended (for pair generation and training)
-- ~20 GB disk space (ImageNet-100 dataset)
+## Setup
 
 ```bash
-git clone <repo>
-cd Computer-Vision
+git clone https://github.com/yr16000/MAE-Computer-Vision.git
+cd MAE-Computer-Vision
 pip install -r requirements
 ```
 
-## Dataset — ImageNet-100
-
-117,000 train / 13,000 val images, 100 classes, ~17 GB.
-Downloaded automatically on first run into `./imagenet100-hf/`.
-
----
-
-## Full Pipeline (WP3)
-
-### Pair Generation
-
-| Notebook | Feature | Output files |
-|----------|---------|--------------|
-| `wp3_1_generation.ipynb` | `z_full` — mean of all MAE patches (noise=0) | `pairs_train.pt`, `pairs_val.pt` |
-| `wp3_4_cls_projection.ipynb` | `z_cls` — MAE CLS token (noise=0) | `pairs_cls_train.pt`, `pairs_cls_val.pt` |
-| `wp3_5_augmented.ipynb` | `z_full` with 75% masking, K=5 masks/image | `pairs_aug_K5_train.pt`, `pairs_aug_K5_val.pt` |
-| `wp3_6_cls_augmented.ipynb` | `z_cls` with 75% masking, K=5 masks/image | `pairs_cls_aug_K5_train.pt`, `pairs_cls_aug_K5_val.pt` |
-
-> `pairs_*.pt` files are **not** in the repo (too large). Regenerate by running the corresponding notebooks.
-
-### MLP Architectures
-
-| Name | Layers |
-|------|--------|
-| **MLP** | Linear → GELU → LayerNorm → Linear |
-| **MLPv2** | BatchNorm → Linear → GELU → Dropout(0.2) → LayerNorm → Linear |
-
-Both project from MAE space (1024d) to CLIP space (768d) with L2 normalisation on the output.
-
-### Training & Results
-
-| Notebook | Model | Val cos sim | Top-1 (test 5k) |
-|----------|-------|-------------|-----------------|
-| `wp3_2_training_baseline.ipynb` | MLP   + z_full          | 0.8894 | 38.1% |
-| `wp3_3_improved.ipynb`          | MLPv2 + z_full          | 0.8898 | 38.4% |
-| `wp3_4_cls_projection.ipynb`    | MLP   + z_cls           | 0.8925 | 40.5% |
-| `wp3_4_cls_projection.ipynb`    | MLPv2 + z_cls           | 0.8929 | 41.7% |
-| `wp3_5_augmented.ipynb`         | MLP   + z_full + aug K=5 | **0.9319** | 58.8% |
-| `wp3_5_augmented.ipynb`         | MLPv2 + z_full + aug K=5 | 0.9306 | 71.9% |
-| `wp3_6_cls_augmented.ipynb`     | MLP   + z_cls  + aug K=5 | **0.9345** | 63.5% |
-| `wp3_6_cls_augmented.ipynb`     | MLPv2 + z_cls  + aug K=5 | 0.9331 | **73.5%** |
-
-### Analysis
-
-| Notebook | Content |
-|----------|---------|
-| `wp3_7_patch_analysis.ipynb` | Patch-level semantic analysis: masked image + CLIP top-1 overlay per visible patch |
+| Resource | Size | Auto-download |
+|---|---|---|
+| `facebook/vit-mae-large` | ~1 GB | Yes |
+| `openai/clip-vit-large-patch14` | ~1 GB | Yes |
+| `llava-1.5-7b-hf` | ~14 GB | Yes |
+| ImageNette (val set) | ~1.5 GB | Yes |
+| ImageNet-100 (`ilee0022/ImageNet100`) | ~17 GB | Yes |
 
 ---
 
-## Provided Checkpoints
+## Notebooks
 
-All trained models are available directly in the repo:
+### MAE Latent Space Analysis
 
-| File | Model | Val cos |
-|------|-------|---------|
-| `projection_mlp_best.pt` + `z_full_norm_stats.pt` | MLP   + z_full          | 0.8894 |
-| `projection_mlpv2_best.pt` + `z_full_norm_stats.pt` | MLPv2 + z_full          | 0.8898 |
-| `projection_cls_mlp_best.pt` + `z_cls_norm_stats.pt` | MLP   + z_cls           | 0.8925 |
-| `projection_cls_mlpv2_best.pt` + `z_cls_norm_stats.pt` | MLPv2 + z_cls           | 0.8929 |
-| `projection_aug_mlp_best.pt` + `z_aug_K5_norm_stats.pt` | MLP   + z_full + aug K=5 | 0.9319 |
-| `projection_aug_mlpv2_best.pt` + `z_aug_K5_norm_stats.pt` | MLPv2 + z_full + aug K=5 | 0.9306 |
-| `projection_cls_aug_mlp_best.pt` + `z_cls_aug_K5_norm_stats.pt` | MLP   + z_cls  + aug K=5 | 0.9345 |
-| `projection_cls_aug_mlpv2_best.pt` + `z_cls_aug_K5_norm_stats.pt` | MLPv2 + z_cls  + aug K=5 | 0.9331 |
+| Notebook | Description |
+|---|---|
+| `mae_umap_visualization.ipynb` | UMAP visualization of MAE patch and CLS embeddings on ImageNette |
+| `mae_patch_sampling_analysis.ipynb` | Latent stability analysis of patch representations under random masking |
 
----
+### MAE → CLIP Projection (closed vocabulary)
 
-## Evaluation & Testing
+| Notebook | Description |
+|---|---|
+| `wp3_6_cls_augmented.ipynb` | Training — CLS token + masking augmentation K=5 on ImageNet-100 |
+| `wp3_cls_aug_test.ipynb` | Zero-shot evaluation of the two best models — loads checkpoints directly, no retraining needed |
 
-```
-wp3_evaluation.ipynb
-```
+Requires: `projection_cls_aug_mlp_best.pt`, `projection_cls_aug_mlpv2_best.pt`, `z_cls_aug_K5_norm_stats.pt` (included).
 
-Standalone evaluation notebook — **no retraining needed**.
+### MAE → LLaVA-1.5 Projection (open-ended generation)
 
-- Loads all available models automatically
-- Computes cosine similarity on the val set
-- Zero-shot top-k predictions per model
-- Final Top-1 accuracy on the full test set (5,000 images)
-- **Custom image test**:
+| Notebook | Description |
+|---|---|
+| `wp4v5_generation_training.ipynb` | Generates 6.5M training pairs (100 masked MAE CLS per image, averaged into 50 groups) then trains the projection MLP targeting LLaVA's CLIP 336px vision tower |
+| `wp4v5_4_test.ipynb` | Injects projected MAE embeddings into LLaVA-1.5 and generates image descriptions |
 
-```python
-IMAGE_PATH = './my_image.jpg'   # any image
-TRUE_LABEL = None               # optional
-```
-
----
-
-## Repository Structure
-
-```
-.
-├── wp3_1_generation.ipynb           # generate z_full pairs
-├── wp3_2_training_baseline.ipynb    # MLP   + z_full
-├── wp3_3_improved.ipynb             # MLPv2 + z_full
-├── wp3_4_cls_projection.ipynb       # MLP + MLPv2 + z_cls
-├── wp3_5_augmented.ipynb            # MLP + MLPv2 + z_full + aug K=5
-├── wp3_6_cls_augmented.ipynb        # MLP + MLPv2 + z_cls  + aug K=5
-├── wp3_7_patch_analysis.ipynb       # patch-level analysis
-├── wp3_evaluation.ipynb             # evaluate all models
-│
-├── projection_mlp_best.pt           # checkpoint MLP   + z_full
-├── projection_mlpv2_best.pt         # checkpoint MLPv2 + z_full
-├── projection_cls_mlp_best.pt       # checkpoint MLP   + z_cls
-├── projection_cls_mlpv2_best.pt     # checkpoint MLPv2 + z_cls
-├── projection_aug_mlp_best.pt       # checkpoint MLP   + z_full + aug K=5
-├── projection_aug_mlpv2_best.pt     # checkpoint MLPv2 + z_full + aug K=5
-├── projection_cls_aug_mlp_best.pt   # checkpoint MLP   + z_cls  + aug K=5
-├── projection_cls_aug_mlpv2_best.pt # checkpoint MLPv2 + z_cls  + aug K=5
-│
-├── z_full_norm_stats.pt             # normalisation stats z_full
-├── z_cls_norm_stats.pt              # normalisation stats z_cls
-├── z_aug_K5_norm_stats.pt           # normalisation stats z_full + aug K=5
-├── z_cls_aug_K5_norm_stats.pt       # normalisation stats z_cls  + aug K=5
-```
+Run `wp4v5_generation_training.ipynb` first. `wp4v5_4_test.ipynb` requires `wp4v5_ftheta_best_24.pt` and `wp4v5_norm_stats.pt` (included in this repo).
