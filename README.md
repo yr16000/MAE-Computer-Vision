@@ -30,7 +30,7 @@ pip install -r requirements
 | Notebook | Description |
 |---|---|
 | `wp1_mae_umap_visualization.ipynb` | UMAP visualization of MAE patch and CLS embeddings on ImageNette |
-| `wp2_mae_patch_sampling_analysis.ipynb` | Latent stability analysis of patch representations under random masking |
+| `mae_patch_sampling_analysis.ipynb` | Latent stability analysis of patch representations under random masking |
 
 ### MAE → CLIP Projection (closed vocabulary)
 
